@@ -72,6 +72,24 @@ class PlotData:
             for i in range(0,len(self.x)):
                 f.write('{} {} {} {}\n'.format(self.x[i], self.y[i], self.dx[i], self.dy[i]))
 
+    def split(self):
+        '''
+        Checking for ignored chanels and returns a list PlotData
+        '''
+        right = self[:-1].x+self[:-1].dx
+        left = self[1:].x-self[1:].dx
+        diff = np.abs(right-left) > 0
+        split_indices = np.where(diff)[0] + 1  # Add 1 to split *after* the True
+        # Use np.split to split the array at those indices
+        
+        nseg = len(split_indices)+1
+        #print('{} segments'.format(nseg))
+        split_indices = np.hstack([[0],split_indices,[len(diff)]])
+        seg = []
+        for i in range(0,nseg):
+            seg.append(self[split_indices[i]:split_indices[i+1]])
+        return(seg)
+
     def plot_err(self, ax, fmt='.', **kwargs):
         '''
         Function to add a plot_data object to an existing matplotlib `ax` object.
@@ -132,25 +150,32 @@ class PlotData:
             ax.plot([item.x-item.dx, item.x+item.dx], [item.y]*2,
                             c=c, label=the_label, **kwargs)
         return ax
- 
-    def to_step(self):
+    
+    def plot_step_h(self, ax, c='k', label='', **kwargs):
         '''
-        Function to create a step function out of a plot_data object. Returns a plot_model object
+        Function to add a plot_data object to an existing matplotlib `ax` object. 
+        Create a fill between value+error bar and value-errorbar
+
+        :param ax: a matplotlib `ax` object
         '''
+        split = self.split()
+        for j, s in enumerate(split):
+            if j == 0:
+                the_label=label
+            else:
+                the_label=''
 
-        # note that for matplotlib step plots we need an x-axis array which includes the start and end value for each
-        # bin and the y-axis has to be the same size with an extra value added equal to the value of the last bin
-        nE = len(self.energies)
-        #stepenergies = list()
-        stepenergies = np.array([])
-        for i in range(nE):
-            stepenergies = np.append(stepenergies, self.energies[i] - self.edeltas[i])
-            #stepenergies.append(self.energies[i] - self.edeltas[i])
-        stepenergies = np.append(stepenergies, self.energies[-1]+self.edeltas[-1])
-        #stepenergies.append(self.energies[-1]+self.edeltas[-1])
-        rates = np.append(self.rates, self.rates[-1])
+            nx = len(s.x)
+            step_x = np.array([])
+            step_y = np.array([])
+            for i in range(nx-1):
+                step_x = np.append(step_x, s.x[i] - s.dx[i])
+                step_y = np.append(step_y, s.y[i])
+                step_x = np.append(step_x, s.x[i] + s.dx[i])
+                step_y = np.append(step_y, s.y[i])
 
-        return plot_model(stepenergies, rates, [])
+            ax.plot(step_x, step_y, c=c, label=the_label, **kwargs)
+        return ax
 
 def get_SpectrumData(s=1, w=1):
     '''
@@ -221,23 +246,27 @@ def get_ModelCompData(s=1, w=1):
     :rtype: a `plot_data` object. 
     '''
     ### Should check is Plot.add = True....
+    #print(xspec.Plot.add)
+    if xspec.Plot.add == False:
+        print('Plot.add must be set to True')
+        return([])
 
     # get the info for the plotting
     x = np.array(xspec.Plot.x(s,w))
     dx = np.array(xspec.Plot.xErr(s,w))
     dy = np.zeros(len(x))
-    #labels = xspec.Plot.labels()
     ncomp = xspec.Plot.nAddComps(s,w)
+    print(ncomp)
     comps = []
 
     if ncomp > 0:
         for i in range(0,ncomp):
             compmodel = xspec.Plot.addComp(i+1,s,w)
-            compmodel.append(compmodel[-1])
-            comps.append(np.array(compmodel))
+            comps.append(PlotData(x,np.array(compmodel),dx,dy))
 
-    else:
-        return comps
+    return comps
+
+
 
 
 def read_plot_data(filename):
