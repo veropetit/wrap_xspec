@@ -271,114 +271,13 @@ def get_ModelCompData(spec, w=1):
 
     return comps
 
-
-
-
-def read_plot_data(filename):
+def read_PlotData(filename):
     '''
-    Function to read in a saved plot_data object. 
+    Function to read in a saved PlotData object. 
 
-    :param filename: the path/filename of the saved plot_data object. 
-    :rtype plot_data:
+    :param filename: the path/filename of the saved PlotData object. 
+    :rtype PlotData:
     '''
     data = np.genfromtxt(filename, names=True )
     return PlotData(data['x'], data['y'], data['dx'], data['dy'])
 
-class plot_model:
-    def __init__(self, stepenergies, foldedmodel, foldedcomps):
-        '''Initialization of a plot_model object
-        
-        :param stepenergies: The energy/wavelength at the edges of the bins
-        :param foldedmodel: The value of the model at the edges of the bins
-        :param foldedcomps: The values of the model componenets at the edges of the bins
-        '''
-        self.stepenergies=stepenergies
-        self.foldedmodel=foldedmodel
-        self.foldedcomps=foldedcomps
-
-    def save(self, filename):
-        '''
-        Save a plot_model object to an ascii file. 
-        Can be read with the read_plot_model() function. 
-
-        :param filename: the path/filename of the output file. 
-        '''
-        ncomps = len(self.foldedcomps)
-        if ncomps > 0:
-            labels = ' '.join( ['comp{}'.format(i+1) for i in range(0,ncomps)] )
-        else:
-            labels = ''
-
-        with open(filename, mode='w') as f:
-            f.write('stepenergies foldedmodel ' + labels + '\n')
-            for i in range(0,len(self.stepenergies)):
-                row = ' '.join( [ {}.format( self.foldedcomps[x][i]) for x in range(0,ncomps) ] )
-
-                f.write('{} {} {}\n'.format(self.stepenergies[i], self.foldedmodel[i], row))
-
-    def plot(self, ax, comp=None, **kwargs):
-        '''
-        Function to add a model to an existing matplotlib `ax` object. If `comp` is None (default),
-        the total model is plotted as a step function. If `comp` is an integer, it will plot 
-        the model component of that index (NOTE: compoenent indexes start at 1). 
-        '''
-
-        if comp == None:
-            ax.step(self.stepenergies,self.foldedmodel, where='post', **kwargs)
-        else:
-            if comp <= len(self.foldedcomps):
-                ax.step(self.stepenergies,self.foldedcomps[comp-1], where='post', **kwargs)
-            else:
-                print('Component index {} out of range for model'.format(comp))
-
-        return ax
-    
-def get_plot_model(s=1,w=1):
-    '''
-    Helper function to gather the info necessary to make a step Plot Model in matplotlib.
-    This function assumes that a spectrum and model are loaded in xspec already. 
-
-    :param s: (=1) ??
-    :param w: (=1) ??
-    :rtype: a `plot_model` object. 
-    '''
-    xspec.Plot.device = "/null"
-    xspec.Plot.add = True
-    xspec.Plot("data")
-    energies = xspec.Plot.x(s,w)
-    edeltas = xspec.Plot.xErr(s,w)
-    foldedmodel = xspec.Plot.model(s,w)
-    # note that for matplotlib step plots we need an x-axis array which includes the start and end value for each
-    # bin and the y-axis has to be the same size with an extra value added equal to the value of the last bin
-    nE = len(energies)
-    stepenergies = np.array([])
-    for i in range(nE):
-        stepenergies = np.append(stepenergies, energies[i] - edeltas[i])
-    stepenergies = np.append(stepenergies, energies[-1]+edeltas[-1])
-    foldedmodel = np.append(foldedmodel, foldedmodel[-1])
-    ncomp = xspec.Plot.nAddComps(s,w)
-    comps = []
-
-    if ncomp > 0:
-        for i in range(0,ncomp):
-            compmodel = xspec.Plot.addComp(i+1,s,w)
-            compmodel.append(compmodel[-1])
-            comps.append(np.array(compmodel))
-
-    return plot_model(stepenergies, foldedmodel, comps)
-
-def read_plot_model(filename):
-    '''
-    Function to read in a saved plot_model object. 
-
-    :param filename: the path/filename of the saved plot_model object. 
-    :rtype plot_model:
-    '''
-    data = np.genfromtxt(filename, names=True )
-    ncomps = len(data.dtype.names) - 2
-    if ncomps > 0:
-        comps = [ data['comp{}'.format(i+1)] for i in range(0,ncomps) ]
-    else:
-        comps = []
-
-    return plot_model(data['stepenergies'], data['foldedmodel'], foldedcomps=comps)
