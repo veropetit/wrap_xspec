@@ -3,7 +3,7 @@ import os
 import numpy as np
 import xspec
 
-class spectrum:
+class SpectrumLoader:
     '''This is a helper class to store the file information for a single spectrum'''
     def __init__(self, path, pi, back, rmf, arf) -> None:
         '''
@@ -35,7 +35,7 @@ class spectrum:
         path = os.getcwd()
         os.chdir(self.path)
         print('Moving to {}'.format(os.getcwd()))
-        s = xspectrum(self.pi, 
+        s = xspec.Spectrum(self.pi, 
                     backFile=self.back, 
                     respFile=self.rmf, 
                     arfFile=self.arf)
@@ -45,23 +45,5 @@ class spectrum:
         return(s)
     
 
-class xspectrum(xspec.Spectrum):
 
-    def plot_chanels(self, ax):
-        ax.errorbar(self.noticed, self.values, self.variance)
-        return ax
-    
-    def energy_mid(self):
-        '''
-        Function to get the mid point energy of a energy/wavelength bin. 
-        To be used with scatter plots. 
-        '''
-
-        # the energies property is a list of tuples. 
-        low = np.array([x[0] for x in self.energies])
-        high = np.array([x[1] for x in self.energies])
-
-        return (low+high)/2.0
-    
-    #def plot_step(self, ax):
 

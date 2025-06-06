@@ -168,7 +168,7 @@ class PlotData:
             nx = len(s.x)
             step_x = np.array([])
             step_y = np.array([])
-            for i in range(nx-1):
+            for i in range(nx):
                 step_x = np.append(step_x, s.x[i] - s.dx[i])
                 step_y = np.append(step_y, s.y[i])
                 step_x = np.append(step_x, s.x[i] + s.dx[i])
@@ -177,7 +177,7 @@ class PlotData:
             ax.plot(step_x, step_y, c=c, label=the_label, **kwargs)
         return ax
 
-def get_SpectrumData(s=1, w=1):
+def get_SpectrumData(spec, w=1):
     '''
     Helper function to gather the info necessary to make a Plot Data in matplotlib.
     
@@ -194,6 +194,8 @@ def get_SpectrumData(s=1, w=1):
     :param w: (w=1) ???
     :rtype: a `plot_data` object. 
     '''
+    s = spec.index
+
     # get the info for the plotting
     x = np.array(xspec.Plot.x(s,w))
     dx = np.array(xspec.Plot.xErr(s,w))
@@ -202,7 +204,7 @@ def get_SpectrumData(s=1, w=1):
     #labels = xspec.Plot.labels()
     return PlotData(x, y, dx, dy)
 
-def get_ModelData(s=1, w=1):
+def get_ModelData(spec, w=1):
     '''
     Helper function to gather the info necessary to make a Plot Data in matplotlib.
     
@@ -219,6 +221,7 @@ def get_ModelData(s=1, w=1):
     :param w: (w=1) ???
     :rtype: a `plot_data` object. 
     '''
+    s = spec.index
     # get the info for the plotting
     x = np.array(xspec.Plot.x(s,w))
     dx = np.array(xspec.Plot.xErr(s,w))
@@ -228,7 +231,7 @@ def get_ModelData(s=1, w=1):
 
     return PlotData(x, y, dx, dy)
 
-def get_ModelCompData(s=1, w=1):
+def get_ModelCompData(spec, w=1):
     '''
     Helper function to gather the info necessary to make a Plot Data in matplotlib.
     
@@ -251,12 +254,14 @@ def get_ModelCompData(s=1, w=1):
         print('Plot.add must be set to True')
         return([])
 
+    s = spec.index
+
     # get the info for the plotting
     x = np.array(xspec.Plot.x(s,w))
     dx = np.array(xspec.Plot.xErr(s,w))
     dy = np.zeros(len(x))
     ncomp = xspec.Plot.nAddComps(s,w)
-    print(ncomp)
+    #print(ncomp)
     comps = []
 
     if ncomp > 0:
