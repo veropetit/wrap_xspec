@@ -1,2 +1,3 @@
 from . import plot
-from .spectrum import *
+from .model import *
+from .SpectrumLoader import *

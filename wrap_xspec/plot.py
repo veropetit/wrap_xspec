@@ -179,19 +179,13 @@ class PlotData:
 
 def get_SpectrumData(spec, w=1):
     '''
-    Helper function to gather the info necessary to make a Plot Data in matplotlib.
+    Helper function to gather the xspec.Plot data for a specific spectrum object.
     
-    This function assumes that a spectrum is loaded in xspec already. 
-    The xaxis is set to keV. 
-    NOTE: need to check whether I can re-initialize the status of the xspec.Plot 
-    to its default values, because this is basically using global variables...
-    The yaxis default is count/s/keV, but I need to make sure that it cannot be 
-    set in a previous cell... 
+    This function assumes that xspec.Plot("data") command has already been issued
+    and that the desired settings have already been made (such as xspec.Plot.xAxis="keV", etc). 
     
-    (I think that the log status of the xspec plot is irrelevant when accessing the xspec.Plot.x()...)
-
-    :param s: (s=1) the index of the spectrum???
-    :param w: (w=1) ???
+    :param spec: The spectrum object that is associated with the loaded spectrum to be extracted (the function will access its index)
+    :param w: (w=1) the window with the xspec.Plot("data")
     :rtype: a `plot_data` object. 
     '''
     s = spec.index
@@ -204,21 +198,45 @@ def get_SpectrumData(spec, w=1):
     #labels = xspec.Plot.labels()
     return PlotData(x, y, dx, dy)
 
+def get_BackgroundData(spec, w=1):
+    '''
+    Helper function to gather the xspec.Plot background data for a specific spectrum object.
+    
+    This function assumes that xspec.Plot("data") command has already been issued
+    and that the desired settings have already been made (such as xspec.Plot.xAxis="keV", etc). 
+    
+    IMPORTANT: xspec.Plot.background must be set to True. 
+
+    :param spec: The spectrum object that is associated with the loaded background to be extracted (the function will access its index)
+    :param w: (w=1) the window with the xspec.Plot("data")
+    :rtype: a `plot_data` object. 
+    '''
+
+    if xspec.Plot.background == False:
+        print('Plot.background must be set to True')
+        return(None)
+
+    s = spec.index
+
+    # get the info for the plotting
+    x = np.array(xspec.Plot.x(s,w))
+    dx = np.array(xspec.Plot.xErr(s,w))
+    y = np.array(xspec.Plot.backgroundVals(s,w))
+    dy = np.zeros(len(x))
+    return PlotData(x, y, dx, dy)
+
+
 def get_ModelData(spec, w=1):
     '''
-    Helper function to gather the info necessary to make a Plot Data in matplotlib.
+    Helper function to gather the xspec.Plot model data for a specific spectrum object.
     
-    This function assumes that a spectrum is loaded in xspec already. 
-    The xaxis is set to keV. 
-    NOTE: need to check whether I can re-initialize the status of the xspec.Plot 
-    to its default values, because this is basically using global variables...
-    The yaxis default is count/s/keV, but I need to make sure that it cannot be 
-    set in a previous cell... 
+    This function assumes that xspec.Plot("data") command has already been issued
+    and that the desired settings have already been made (such as xspec.Plot.xAxis="keV", etc). 
     
-    (I think that the log status of the xspec plot is irrelevant when accessing the xspec.Plot.x()...)
+    IMPORTANT: A model must be loaded. 
 
-    :param s: (s=1) the index of the spectrum???
-    :param w: (w=1) ???
+    :param spec: The spectrum object that is associated with model to be extracted (the function will access its index)
+    :param w: (w=1) the window with the xspec.Plot("data")
     :rtype: a `plot_data` object. 
     '''
     s = spec.index
@@ -233,21 +251,18 @@ def get_ModelData(spec, w=1):
 
 def get_ModelCompData(spec, w=1):
     '''
-    Helper function to gather the info necessary to make a Plot Data in matplotlib.
+    Helper function to gather the xspec.Plot model component data for a specific spectrum object.
     
-    This function assumes that a spectrum is loaded in xspec already. 
-    The xaxis is set to keV. 
-    NOTE: need to check whether I can re-initialize the status of the xspec.Plot 
-    to its default values, because this is basically using global variables...
-    The yaxis default is count/s/keV, but I need to make sure that it cannot be 
-    set in a previous cell... 
+    This function assumes that xspec.Plot("data") command has already been issued
+    and that the desired settings have already been made (such as xspec.Plot.xAxis="keV", etc). 
     
-    (I think that the log status of the xspec plot is irrelevant when accessing the xspec.Plot.x()...)
+    IMPORTANT: xspec.Plot.add must be set to True. 
 
-    :param s: (s=1) the index of the spectrum???
-    :param w: (w=1) ???
-    :rtype: a `plot_data` object. 
+    :param spec: The spectrum object that is associated with the model components to be extracted (the function will access its index)
+    :param w: (w=1) the window with the xspec.Plot("data")
+    :rtype: a list of `plot_data` objects. 
     '''
+
     ### Should check is Plot.add = True....
     #print(xspec.Plot.add)
     if xspec.Plot.add == False:
