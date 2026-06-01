@@ -1,5 +1,7 @@
 # wrap_xspec
 
+NOT READY FOR USE YET -- STILL IN DEVELOPMENT
+
 Wrap_xspec is a wrapper module to facilitate work with pyXspec for users that are less experienced with regular-xspec and/or command-line tools in general. 
 
 It supports an analysis workflow that emphasis clarity and reproducability through the use of python scripts or python notebooks. 
