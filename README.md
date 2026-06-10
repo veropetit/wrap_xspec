@@ -117,7 +117,7 @@ This project's goal is to facilitate the use of pyXspec for novice users, who mi
 
         Note: with this option, each spectrum is loaded with the "xspec.Spectrum()" command. Therefore each new spectrum in these lists will be *added* to the current xspec.AllData. In other words, the xspec.AllData will not be cleared. 
 
-    3. The function-keyword `groups` accepts a list of integers that will list the group each spectrum belongs to. SpectrumLoader will then construct the appropriate string and pass it to xspec.AllData. 
+    3. [NOT IMPLEMENTED YET] The function-keyword `groups` accepts a list of integers that will list the group each spectrum belongs to. SpectrumLoader will then construct the appropriate string and pass it to xspec.AllData. 
 
         First note: When using the groups keyword, SpectrumLoader will first clear AllData, otherwise things can get a bit messy because AllData might (or might not) remove some of the already loaded spectra. 
 

@@ -2,3 +2,9 @@
 wrap_xspec/__pycache__/plot.cpython-39.pyc
 Tutorials/.DS_Store
 /Tutorials/OutputData/*
+.DS_Store
+.DS_Store
+Tests/__pycache__/__init__.cpython-312.pyc
+Tests/__pycache__/conftest.cpython-312-pytest-9.0.3.pyc
+/Tests/__pycache__
+Tutorials/InputData/.DS_Store
